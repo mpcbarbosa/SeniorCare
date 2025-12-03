@@ -24,38 +24,19 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-i
 
 # Configurar DATABASE_URL
 database_url = os.environ.get('DATABASE_URL', '')
+
 if database_url:
     # Render usa postgres:// mas SQLAlchemy precisa de postgresql://
     if database_url.startswith('postgres://'):
         database_url = database_url.replace('postgres://', 'postgresql://', 1)
     
-    # Verificar qual driver PostgreSQL está disponível
-    try:
-        import psycopg2
-        # psycopg2 disponível - usar driver padrão
-        pass
-    except ImportError:
-        try:
-            import psycopg
-            # psycopg3 disponível - usar driver específico
-            if 'postgresql://' in database_url and '+' not in database_url.split('://')[0]:
-                database_url = database_url.replace('postgresql://', 'postgresql+psycopg://', 1)
-        except ImportError:
-            print("Aviso: Nenhum driver PostgreSQL encontrado. A usar SQLite.")
-            database_url = ''
-    
     app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+    print(f"Database: PostgreSQL configurado")
 else:
     # Fallback para SQLite local
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///seniorcare.db'
-
-# Log da configuração (sem password)
-db_uri_safe = app.config['SQLALCHEMY_DATABASE_URI']
-if '@' in db_uri_safe:
-    # Esconder password no log
-    parts = db_uri_safe.split('@')
-    db_uri_safe = parts[0].rsplit(':', 1)[0] + ':***@' + parts[1]
-print(f"Database: {db_uri_safe}")
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'seniorcare.db')
+    print(f"Database: SQLite (local)")
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
