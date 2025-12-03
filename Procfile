@@ -1,1 +1,1 @@
-web: gunicorn SeniorCare:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT
+web: uvicorn SeniorCare:application --host 0.0.0.0 --port $PORT
