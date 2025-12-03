@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from ..database import get_db
 from ..models.medication import Medication
 from ..models.user import User
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import time
 
 router = APIRouter()
@@ -15,15 +15,14 @@ class MedicationCreate(BaseModel):
     frequency: str = "daily"
 
 class MedicationResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     user_id: int
     name: str
     dose: str
     time: str
     frequency: str
-
-    class Config:
-        orm_mode = True
 
 @router.post("/medications/", response_model=MedicationResponse)
 def create_medication(medication: MedicationCreate, user_id: int, db: Session = Depends(get_db)):

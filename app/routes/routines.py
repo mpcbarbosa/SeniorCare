@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from ..database import get_db
 from ..models.routine import Routine
 from ..models.user import User
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import time
 
 router = APIRouter()
@@ -14,14 +14,13 @@ class RoutineCreate(BaseModel):
     frequency: str = "daily"
 
 class RoutineResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     user_id: int
     activity: str
     time: str
     frequency: str
-
-    class Config:
-        orm_mode = True
 
 @router.post("/routines/", response_model=RoutineResponse)
 def create_routine(routine: RoutineCreate, user_id: int, db: Session = Depends(get_db)):
