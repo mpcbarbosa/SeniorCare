@@ -303,6 +303,149 @@ class ChatMessage(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+class Appointment(db.Model):
+    """Consultas médicas"""
+    __tablename__ = 'appointments'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    title = db.Column(db.String(200), nullable=False)
+    doctor_name = db.Column(db.String(100))
+    specialty = db.Column(db.String(100))
+    location = db.Column(db.String(200))
+    appointment_date = db.Column(db.Date, nullable=False)
+    appointment_time = db.Column(db.Time, nullable=False)
+    notes = db.Column(db.Text)
+    reminder_hours_before = db.Column(db.Integer, default=24)
+    status = db.Column(db.String(20), default='scheduled')  # scheduled, completed, cancelled
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    user = db.relationship('User', backref=db.backref('appointments', lazy='dynamic'))
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'doctor_name': self.doctor_name,
+            'specialty': self.specialty,
+            'location': self.location,
+            'appointment_date': self.appointment_date.isoformat() if self.appointment_date else None,
+            'appointment_time': self.appointment_time.strftime('%H:%M') if self.appointment_time else None,
+            'notes': self.notes,
+            'reminder_hours_before': self.reminder_hours_before,
+            'status': self.status,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+        }
+
+
+class HealthReading(db.Model):
+    """Medições de saúde (tensão, glicemia, peso, etc.)"""
+    __tablename__ = 'health_readings'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    reading_type = db.Column(db.String(50), nullable=False)  # blood_pressure, glucose, weight, temperature, heart_rate, oxygen
+    value_primary = db.Column(db.Float, nullable=False)  # Valor principal (sistólica, glicemia, peso, etc.)
+    value_secondary = db.Column(db.Float)  # Valor secundário (diastólica para tensão)
+    unit = db.Column(db.String(20))  # mmHg, mg/dL, kg, °C, bpm, %
+    notes = db.Column(db.Text)
+    measured_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    user = db.relationship('User', backref=db.backref('health_readings', lazy='dynamic'))
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'reading_type': self.reading_type,
+            'value_primary': self.value_primary,
+            'value_secondary': self.value_secondary,
+            'unit': self.unit,
+            'notes': self.notes,
+            'measured_at': self.measured_at.isoformat() if self.measured_at else None,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+        }
+
+
+class MedicationAlertConfig(db.Model):
+    """Configuração de alertas de medicação"""
+    __tablename__ = 'medication_alert_configs'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    medication_id = db.Column(db.Integer, db.ForeignKey('medications.id'))  # Null = configuração global
+    
+    # Tempos de alerta (em minutos)
+    first_alert_delay = db.Column(db.Integer, default=15)  # Primeiro alerta após X minutos
+    second_alert_delay = db.Column(db.Integer, default=30)  # Segundo alerta
+    escalation_delay = db.Column(db.Integer, default=60)  # Escalar para cuidadores após X minutos
+    
+    # Quem notificar
+    notify_user_sound = db.Column(db.Boolean, default=True)
+    notify_user_vibration = db.Column(db.Boolean, default=True)
+    notify_caregivers = db.Column(db.Boolean, default=True)
+    notify_via_sms = db.Column(db.Boolean, default=False)
+    notify_via_whatsapp = db.Column(db.Boolean, default=True)
+    notify_via_push = db.Column(db.Boolean, default=True)
+    
+    # Cuidadores específicos a notificar (lista de IDs separados por vírgula)
+    caregiver_ids = db.Column(db.String(200))
+    
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    user = db.relationship('User', backref=db.backref('alert_configs', lazy='dynamic'))
+    medication = db.relationship('Medication', backref=db.backref('alert_config', uselist=False))
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'medication_id': self.medication_id,
+            'first_alert_delay': self.first_alert_delay,
+            'second_alert_delay': self.second_alert_delay,
+            'escalation_delay': self.escalation_delay,
+            'notify_user_sound': self.notify_user_sound,
+            'notify_user_vibration': self.notify_user_vibration,
+            'notify_caregivers': self.notify_caregivers,
+            'notify_via_sms': self.notify_via_sms,
+            'notify_via_whatsapp': self.notify_via_whatsapp,
+            'notify_via_push': self.notify_via_push,
+            'caregiver_ids': self.caregiver_ids.split(',') if self.caregiver_ids else [],
+            'is_active': self.is_active,
+        }
+
+
+class NotificationLog(db.Model):
+    """Log de notificações enviadas"""
+    __tablename__ = 'notification_logs'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    notification_type = db.Column(db.String(50), nullable=False)  # medication_reminder, appointment_reminder, health_alert, emergency
+    reference_type = db.Column(db.String(50))  # medication, appointment, health_reading
+    reference_id = db.Column(db.Integer)
+    message = db.Column(db.Text, nullable=False)
+    channel = db.Column(db.String(20))  # push, sms, whatsapp, email
+    sent_to = db.Column(db.String(200))  # user, caregiver_id, phone_number
+    status = db.Column(db.String(20), default='pending')  # pending, sent, delivered, failed
+    sent_at = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    user = db.relationship('User', backref=db.backref('notifications', lazy='dynamic'))
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'notification_type': self.notification_type,
+            'message': self.message,
+            'channel': self.channel,
+            'status': self.status,
+            'sent_at': self.sent_at.isoformat() if self.sent_at else None,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+        }
+
+
 # ==================== AUTENTICAÇÃO ====================
 
 def token_required(f):
@@ -854,6 +997,350 @@ def get_user_summary(current_caregiver, user_id):
         'pending_alerts': pending_alerts,
         'last_mood': last_mood.to_dict() if last_mood else None,
     })
+
+
+# ==================== CONSULTAS ====================
+
+@app.route('/api/appointments', methods=['GET'])
+@token_required
+def get_appointments(current_user):
+    """Listar consultas"""
+    status = request.args.get('status', 'scheduled')
+    query = Appointment.query.filter_by(user_id=current_user.id)
+    
+    if status != 'all':
+        query = query.filter_by(status=status)
+    
+    appointments = query.order_by(Appointment.appointment_date, Appointment.appointment_time).all()
+    return jsonify([a.to_dict() for a in appointments])
+
+
+@app.route('/api/appointments', methods=['POST'])
+@token_required
+def create_appointment(current_user):
+    """Criar nova consulta"""
+    data = request.get_json()
+    
+    appointment = Appointment(
+        user_id=current_user.id,
+        title=data['title'],
+        doctor_name=data.get('doctor_name'),
+        specialty=data.get('specialty'),
+        location=data.get('location'),
+        appointment_date=datetime.strptime(data['appointment_date'], '%Y-%m-%d').date(),
+        appointment_time=datetime.strptime(data['appointment_time'], '%H:%M').time(),
+        notes=data.get('notes'),
+        reminder_hours_before=data.get('reminder_hours_before', 24),
+    )
+    db.session.add(appointment)
+    db.session.commit()
+    
+    return jsonify(appointment.to_dict()), 201
+
+
+@app.route('/api/appointments/<int:appointment_id>', methods=['PUT'])
+@token_required
+def update_appointment(current_user, appointment_id):
+    """Atualizar consulta"""
+    appointment = Appointment.query.filter_by(id=appointment_id, user_id=current_user.id).first_or_404()
+    data = request.get_json()
+    
+    if 'title' in data:
+        appointment.title = data['title']
+    if 'doctor_name' in data:
+        appointment.doctor_name = data['doctor_name']
+    if 'specialty' in data:
+        appointment.specialty = data['specialty']
+    if 'location' in data:
+        appointment.location = data['location']
+    if 'appointment_date' in data:
+        appointment.appointment_date = datetime.strptime(data['appointment_date'], '%Y-%m-%d').date()
+    if 'appointment_time' in data:
+        appointment.appointment_time = datetime.strptime(data['appointment_time'], '%H:%M').time()
+    if 'notes' in data:
+        appointment.notes = data['notes']
+    if 'status' in data:
+        appointment.status = data['status']
+    if 'reminder_hours_before' in data:
+        appointment.reminder_hours_before = data['reminder_hours_before']
+    
+    db.session.commit()
+    return jsonify(appointment.to_dict())
+
+
+@app.route('/api/appointments/<int:appointment_id>', methods=['DELETE'])
+@token_required
+def delete_appointment(current_user, appointment_id):
+    """Eliminar consulta"""
+    appointment = Appointment.query.filter_by(id=appointment_id, user_id=current_user.id).first_or_404()
+    db.session.delete(appointment)
+    db.session.commit()
+    return jsonify({'message': 'Consulta eliminada'})
+
+
+@app.route('/api/appointments/upcoming', methods=['GET'])
+@token_required
+def get_upcoming_appointments(current_user):
+    """Obter próximas consultas"""
+    today = datetime.utcnow().date()
+    appointments = Appointment.query.filter(
+        Appointment.user_id == current_user.id,
+        Appointment.status == 'scheduled',
+        Appointment.appointment_date >= today
+    ).order_by(Appointment.appointment_date, Appointment.appointment_time).limit(5).all()
+    return jsonify([a.to_dict() for a in appointments])
+
+
+# ==================== MEDIÇÕES DE SAÚDE ====================
+
+@app.route('/api/health/readings', methods=['GET'])
+@token_required
+def get_health_readings(current_user):
+    """Listar medições de saúde"""
+    reading_type = request.args.get('type')
+    limit = request.args.get('limit', 50, type=int)
+    
+    query = HealthReading.query.filter_by(user_id=current_user.id)
+    
+    if reading_type:
+        query = query.filter_by(reading_type=reading_type)
+    
+    readings = query.order_by(HealthReading.measured_at.desc()).limit(limit).all()
+    return jsonify([r.to_dict() for r in readings])
+
+
+@app.route('/api/health/readings', methods=['POST'])
+@token_required
+def create_health_reading(current_user):
+    """Registar nova medição de saúde"""
+    data = request.get_json()
+    
+    reading = HealthReading(
+        user_id=current_user.id,
+        reading_type=data['reading_type'],
+        value_primary=data['value_primary'],
+        value_secondary=data.get('value_secondary'),
+        unit=data.get('unit'),
+        notes=data.get('notes'),
+        measured_at=datetime.strptime(data['measured_at'], '%Y-%m-%dT%H:%M') if data.get('measured_at') else datetime.utcnow(),
+    )
+    db.session.add(reading)
+    db.session.commit()
+    
+    return jsonify(reading.to_dict()), 201
+
+
+@app.route('/api/health/readings/<int:reading_id>', methods=['DELETE'])
+@token_required
+def delete_health_reading(current_user, reading_id):
+    """Eliminar medição de saúde"""
+    reading = HealthReading.query.filter_by(id=reading_id, user_id=current_user.id).first_or_404()
+    db.session.delete(reading)
+    db.session.commit()
+    return jsonify({'message': 'Medição eliminada'})
+
+
+@app.route('/api/health/readings/latest', methods=['GET'])
+@token_required
+def get_latest_readings(current_user):
+    """Obter última medição de cada tipo"""
+    types = ['blood_pressure', 'glucose', 'weight', 'temperature', 'heart_rate', 'oxygen']
+    latest = {}
+    
+    for t in types:
+        reading = HealthReading.query.filter_by(
+            user_id=current_user.id,
+            reading_type=t
+        ).order_by(HealthReading.measured_at.desc()).first()
+        
+        if reading:
+            latest[t] = reading.to_dict()
+    
+    return jsonify(latest)
+
+
+@app.route('/api/health/readings/summary', methods=['GET'])
+@token_required
+def get_health_summary(current_user):
+    """Obter resumo de saúde (médias, últimas medições)"""
+    from sqlalchemy import func
+    
+    # Últimos 30 dias
+    thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+    
+    summary = {}
+    types = ['blood_pressure', 'glucose', 'weight', 'temperature', 'heart_rate', 'oxygen']
+    
+    for t in types:
+        readings = HealthReading.query.filter(
+            HealthReading.user_id == current_user.id,
+            HealthReading.reading_type == t,
+            HealthReading.measured_at >= thirty_days_ago
+        ).all()
+        
+        if readings:
+            values = [r.value_primary for r in readings]
+            summary[t] = {
+                'count': len(readings),
+                'average': round(sum(values) / len(values), 1),
+                'min': min(values),
+                'max': max(values),
+                'latest': readings[-1].to_dict() if readings else None,
+            }
+    
+    return jsonify(summary)
+
+
+# ==================== CONFIGURAÇÕES DE ALERTAS ====================
+
+@app.route('/api/alerts/config', methods=['GET'])
+@token_required
+def get_alert_config(current_user):
+    """Obter configuração de alertas"""
+    # Configuração global (medication_id = null)
+    config = MedicationAlertConfig.query.filter_by(
+        user_id=current_user.id,
+        medication_id=None
+    ).first()
+    
+    if not config:
+        # Criar configuração padrão
+        config = MedicationAlertConfig(
+            user_id=current_user.id,
+            medication_id=None,
+        )
+        db.session.add(config)
+        db.session.commit()
+    
+    return jsonify(config.to_dict())
+
+
+@app.route('/api/alerts/config', methods=['PUT'])
+@token_required
+def update_alert_config(current_user):
+    """Atualizar configuração de alertas"""
+    data = request.get_json()
+    medication_id = data.get('medication_id')
+    
+    config = MedicationAlertConfig.query.filter_by(
+        user_id=current_user.id,
+        medication_id=medication_id
+    ).first()
+    
+    if not config:
+        config = MedicationAlertConfig(
+            user_id=current_user.id,
+            medication_id=medication_id,
+        )
+        db.session.add(config)
+    
+    # Atualizar campos
+    if 'first_alert_delay' in data:
+        config.first_alert_delay = data['first_alert_delay']
+    if 'second_alert_delay' in data:
+        config.second_alert_delay = data['second_alert_delay']
+    if 'escalation_delay' in data:
+        config.escalation_delay = data['escalation_delay']
+    if 'notify_user_sound' in data:
+        config.notify_user_sound = data['notify_user_sound']
+    if 'notify_user_vibration' in data:
+        config.notify_user_vibration = data['notify_user_vibration']
+    if 'notify_caregivers' in data:
+        config.notify_caregivers = data['notify_caregivers']
+    if 'notify_via_sms' in data:
+        config.notify_via_sms = data['notify_via_sms']
+    if 'notify_via_whatsapp' in data:
+        config.notify_via_whatsapp = data['notify_via_whatsapp']
+    if 'notify_via_push' in data:
+        config.notify_via_push = data['notify_via_push']
+    if 'caregiver_ids' in data:
+        config.caregiver_ids = ','.join(str(x) for x in data['caregiver_ids']) if data['caregiver_ids'] else None
+    if 'is_active' in data:
+        config.is_active = data['is_active']
+    
+    db.session.commit()
+    return jsonify(config.to_dict())
+
+
+@app.route('/api/notifications/log', methods=['GET'])
+@token_required
+def get_notification_log(current_user):
+    """Obter histórico de notificações"""
+    limit = request.args.get('limit', 50, type=int)
+    notifications = NotificationLog.query.filter_by(
+        user_id=current_user.id
+    ).order_by(NotificationLog.created_at.desc()).limit(limit).all()
+    return jsonify([n.to_dict() for n in notifications])
+
+
+# ==================== TIPOS DE MEDIÇÕES (para o frontend) ====================
+
+@app.route('/api/health/types', methods=['GET'])
+def get_health_reading_types():
+    """Obter tipos de medições disponíveis"""
+    types = [
+        {
+            'id': 'blood_pressure',
+            'name': 'Tensão Arterial',
+            'name_en': 'Blood Pressure',
+            'icon': '❤️',
+            'unit': 'mmHg',
+            'has_secondary': True,
+            'primary_label': 'Sistólica',
+            'secondary_label': 'Diastólica',
+            'normal_range': {'primary': [90, 120], 'secondary': [60, 80]},
+        },
+        {
+            'id': 'glucose',
+            'name': 'Glicemia',
+            'name_en': 'Blood Glucose',
+            'icon': '🩸',
+            'unit': 'mg/dL',
+            'has_secondary': False,
+            'primary_label': 'Valor',
+            'normal_range': {'primary': [70, 100]},
+        },
+        {
+            'id': 'weight',
+            'name': 'Peso',
+            'name_en': 'Weight',
+            'icon': '⚖️',
+            'unit': 'kg',
+            'has_secondary': False,
+            'primary_label': 'Peso',
+        },
+        {
+            'id': 'temperature',
+            'name': 'Temperatura',
+            'name_en': 'Temperature',
+            'icon': '🌡️',
+            'unit': '°C',
+            'has_secondary': False,
+            'primary_label': 'Temperatura',
+            'normal_range': {'primary': [36, 37.5]},
+        },
+        {
+            'id': 'heart_rate',
+            'name': 'Frequência Cardíaca',
+            'name_en': 'Heart Rate',
+            'icon': '💓',
+            'unit': 'bpm',
+            'has_secondary': False,
+            'primary_label': 'Batimentos',
+            'normal_range': {'primary': [60, 100]},
+        },
+        {
+            'id': 'oxygen',
+            'name': 'Saturação de Oxigénio',
+            'name_en': 'Oxygen Saturation',
+            'icon': '💨',
+            'unit': '%',
+            'has_secondary': False,
+            'primary_label': 'SpO2',
+            'normal_range': {'primary': [95, 100]},
+        },
+    ]
+    return jsonify(types)
 
 
 # ==================== INICIALIZAÇÃO ====================

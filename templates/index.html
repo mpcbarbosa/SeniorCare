@@ -47,6 +47,10 @@
             --medication-light: #FFB74D;
             --companion: #7B1FA2;
             --companion-light: #BA68C8;
+            --appointments: #00838F;
+            --appointments-light: #26C6DA;
+            --health: #AD1457;
+            --health-light: #F06292;
             --background: #FAFAFA;
             --card-bg: #FFFFFF;
             --text-primary: #212121;
@@ -186,7 +190,7 @@
         .button-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
+            gap: 12px;
             margin-top: 8px;
         }
 
@@ -195,18 +199,18 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 12px;
-            padding: 28px 20px;
-            border-radius: 24px;
+            gap: 8px;
+            padding: 20px 16px;
+            border-radius: 20px;
             border: none;
             color: white;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
             font-family: inherit;
             cursor: pointer;
             transition: all 0.2s ease;
             box-shadow: var(--shadow);
-            min-height: 140px;
+            min-height: 110px;
             position: relative;
             overflow: hidden;
         }
@@ -217,7 +221,7 @@
         }
 
         .big-button-icon {
-            font-size: 48px;
+            font-size: 40px;
             line-height: 1;
         }
 
@@ -240,6 +244,14 @@
 
         .big-button.routine {
             background: linear-gradient(145deg, var(--primary-light), var(--primary));
+        }
+
+        .big-button.appointments {
+            background: linear-gradient(145deg, var(--appointments-light), var(--appointments));
+        }
+
+        .big-button.health {
+            background: linear-gradient(145deg, var(--health-light), var(--health));
         }
 
         .big-button.pulse {
@@ -955,6 +967,625 @@
             font-size: 24px;
         }
 
+        /* Alert config styles */
+        .alert-config-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .alert-config-item:last-of-type {
+            border-bottom: none;
+        }
+
+        .alert-config-label {
+            font-size: 18px;
+            color: var(--text-primary);
+        }
+
+        .alert-config-control select {
+            padding: 10px 16px;
+            font-size: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            background: white;
+            font-family: inherit;
+            min-width: 100px;
+        }
+
+        .alert-config-toggles {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .toggle-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: #f5f5f5;
+            border-radius: 12px;
+            cursor: pointer;
+        }
+
+        .toggle-option input[type="checkbox"] {
+            width: 24px;
+            height: 24px;
+            accent-color: var(--primary);
+        }
+
+        .toggle-label {
+            font-size: 18px;
+            color: var(--text-primary);
+        }
+
+        /* Add button */
+        .add-button {
+            width: 100%;
+            padding: 18px 24px;
+            border-radius: 16px;
+            border: none;
+            color: white;
+            font-size: 20px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .add-button.appointments {
+            background: linear-gradient(145deg, var(--appointments-light), var(--appointments));
+        }
+
+        .add-button.health {
+            background: linear-gradient(145deg, var(--health-light), var(--health));
+        }
+
+        .add-button:active {
+            transform: scale(0.98);
+        }
+
+        /* Notification options */
+        .notification-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .notification-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: #f5f5f5;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .notification-option:has(input:checked) {
+            background: #E8F5E9;
+            border: 2px solid var(--primary);
+        }
+
+        .notification-option input[type="radio"] {
+            width: 24px;
+            height: 24px;
+            accent-color: var(--primary);
+        }
+
+        .notification-option .option-text {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        /* Appointment items */
+        .appointment-item {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow);
+            animation: slideIn 0.3s ease backwards;
+        }
+
+        .appointment-item.done {
+            background: #E8F5E9;
+            opacity: 0.7;
+        }
+
+        .appointment-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .appointment-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            background: linear-gradient(145deg, var(--appointments-light), var(--appointments));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .appointment-doctor {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .appointment-details {
+            font-size: 18px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        .appointment-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .appointment-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+        }
+
+        .appointment-btn.done-btn {
+            background: var(--primary);
+            color: white;
+        }
+
+        .appointment-btn.delete-btn {
+            background: #f5f5f5;
+            color: var(--text-secondary);
+        }
+
+        /* Health record items */
+        .health-record-item {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow);
+            animation: slideIn 0.3s ease backwards;
+        }
+
+        .health-record-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .health-record-type {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .health-record-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: linear-gradient(145deg, var(--health-light), var(--health));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+        .health-record-name {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .health-record-date {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .health-record-value {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--health);
+            text-align: center;
+            margin: 12px 0;
+        }
+
+        .health-record-unit {
+            font-size: 18px;
+            font-weight: 400;
+            color: var(--text-secondary);
+        }
+
+        /* Medication undo button */
+        .medication-undo-btn {
+            padding: 10px 16px;
+            border-radius: 12px;
+            border: 2px solid #ddd;
+            background: white;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+
+        .medication-undo-btn:active {
+            background: #f5f5f5;
+        }
+
+        /* Form styles */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 18px;
+            font-family: inherit;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-input-large {
+            font-size: 28px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .form-unit {
+            display: block;
+            text-align: center;
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .form-submit {
+            width: 100%;
+            padding: 18px;
+            border-radius: 16px;
+            border: none;
+            color: white;
+            font-size: 20px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .form-submit.appointments {
+            background: linear-gradient(145deg, var(--appointments-light), var(--appointments));
+        }
+
+        .form-submit.health {
+            background: linear-gradient(145deg, var(--health-light), var(--health));
+        }
+
+        .form-submit:active {
+            transform: scale(0.98);
+        }
+
+        /* Health type selector */
+        .health-type-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .health-type-btn {
+            padding: 12px 8px;
+            border-radius: 12px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .health-type-btn.active {
+            border-color: var(--health);
+            background: #FCE4EC;
+            color: var(--health);
+        }
+
+        .health-type-btn:active {
+            transform: scale(0.96);
+        }
+
+        .health-fields {
+            animation: fadeIn 0.2s ease;
+        }
+
+        /* In-app alert */
+        .in-app-alert {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            background: linear-gradient(145deg, #FFF3E0, #FFE0B2);
+            border: 2px solid var(--medication);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            z-index: 10000;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .in-app-alert .alert-icon {
+            font-size: 32px;
+            flex-shrink: 0;
+        }
+
+        .in-app-alert .alert-content {
+            flex: 1;
+        }
+
+        .in-app-alert .alert-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--medication);
+        }
+
+        .in-app-alert .alert-body {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .in-app-alert .alert-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(0,0,0,0.1);
+            font-size: 18px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--primary);
+            color: white;
+            padding: 16px 28px;
+            border-radius: 16px;
+            font-size: 18px;
+            font-weight: 600;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+            z-index: 3000;
+            opacity: 0;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success { background: #2E7D32; }
+        .toast.warning { background: #F57C00; }
+        .toast.error { background: #C62828; }
+        
+        .toast-icon {
+            font-size: 24px;
+        }
+
+        /* Quick action grid no ecrã de saúde */
+        .quick-health-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .quick-health-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 24px 16px;
+            border-radius: 20px;
+            border: none;
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow);
+            min-height: 100px;
+        }
+
+        .quick-health-btn:active {
+            transform: scale(0.96);
+        }
+
+        .quick-health-btn .icon {
+            font-size: 36px;
+            line-height: 1;
+        }
+
+        .quick-health-btn.bp { background: linear-gradient(145deg, #EF5350, #C62828); }
+        .quick-health-btn.glucose { background: linear-gradient(145deg, #FFB74D, #F57C00); }
+        .quick-health-btn.weight { background: linear-gradient(145deg, #4FC3F7, #0288D1); }
+        .quick-health-btn.temp { background: linear-gradient(145deg, #81C784, #388E3C); }
+        .quick-health-btn.oxygen { background: linear-gradient(145deg, #64B5F6, #1976D2); }
+        .quick-health-btn.heart { background: linear-gradient(145deg, #F06292, #C2185B); }
+
+        /* Quick input modal */
+        .quick-input-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding: 8px;
+        }
+
+        .quick-input-field {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .quick-input {
+            flex: 1;
+            padding: 20px;
+            border: 3px solid #e0e0e0;
+            border-radius: 16px;
+            font-size: 32px;
+            font-weight: 700;
+            font-family: inherit;
+            text-align: center;
+            transition: border-color 0.2s ease;
+        }
+
+        .quick-input:focus {
+            outline: none;
+            border-color: var(--health);
+        }
+
+        .quick-input-unit {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            min-width: 60px;
+        }
+
+        .quick-save-btn {
+            width: 100%;
+            padding: 20px;
+            border-radius: 16px;
+            border: none;
+            background: linear-gradient(145deg, var(--health-light), var(--health));
+            color: white;
+            font-size: 22px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .quick-save-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Seção de resumo rápido */
+        .health-summary-section {
+            margin-top: 24px;
+        }
+
+        .health-summary-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        /* Appointment quick add */
+        .appointment-quick-fields {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .appointment-quick-input {
+            width: 100%;
+            padding: 18px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 14px;
+            font-size: 18px;
+            font-family: inherit;
+            transition: border-color 0.2s ease;
+        }
+
+        .appointment-quick-input:focus {
+            outline: none;
+            border-color: var(--appointments);
+        }
+
+        .appointment-quick-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        .appointment-quick-row > * {
+            flex: 1;
+        }
+
         /* Desktop warning - só mostra em desktop */
         @media (min-width: 768px) {
             .desktop-warning {
@@ -1084,6 +1715,14 @@
                                 <span class="big-button-icon">👨‍👩‍👧</span>
                                 <span class="big-button-label" data-i18n="home_family">Família</span>
                             </button>
+                            <button class="big-button appointments" onclick="showScreen('appointments')">
+                                <span class="big-button-icon">🏥</span>
+                                <span class="big-button-label" data-i18n="home_appointments">Consultas</span>
+                            </button>
+                            <button class="big-button health" onclick="showScreen('health')">
+                                <span class="big-button-icon">❤️</span>
+                                <span class="big-button-label" data-i18n="home_health">Saúde</span>
+                            </button>
                             <button class="big-button routine" onclick="showScreen('routine')">
                                 <span class="big-button-icon">📅</span>
                                 <span class="big-button-label" data-i18n="home_routine">Rotina</span>
@@ -1163,6 +1802,68 @@
                     </main>
                 </div>
 
+                <!-- Appointments Screen -->
+                <div id="screen-appointments" class="screen">
+                    <main class="main-content" style="padding-top: 20px;">
+                        <button class="back-button" onclick="showScreen('home')">
+                            <span class="back-button-icon">←</span>
+                            <span data-i18n="back">Voltar</span>
+                        </button>
+                        <h2 class="screen-title" style="color: var(--appointments);">🏥 <span data-i18n="appointments_title">Consultas</span></h2>
+                        
+                        <button class="add-button appointments" onclick="openAddAppointmentModal()">
+                            ➕ <span data-i18n="appointments_add">Marcar consulta</span>
+                        </button>
+                        
+                        <div id="appointments-list"></div>
+                    </main>
+                </div>
+
+                <!-- Health Records Screen -->
+                <div id="screen-health" class="screen">
+                    <main class="main-content" style="padding-top: 20px;">
+                        <button class="back-button" onclick="showScreen('home')">
+                            <span class="back-button-icon">←</span>
+                            <span data-i18n="back">Voltar</span>
+                        </button>
+                        <h2 class="screen-title" style="color: var(--health);">❤️ <span data-i18n="health_title">Registos de Saúde</span></h2>
+                        
+                        <!-- Botões grandes de acesso rápido -->
+                        <div class="quick-health-grid">
+                            <button class="quick-health-btn bp" onclick="openQuickHealthModal('blood_pressure')">
+                                <span class="icon">🩸</span>
+                                <span data-i18n="health_blood_pressure">Tensão</span>
+                            </button>
+                            <button class="quick-health-btn glucose" onclick="openQuickHealthModal('glucose')">
+                                <span class="icon">🍬</span>
+                                <span data-i18n="health_glucose">Glicemia</span>
+                            </button>
+                            <button class="quick-health-btn weight" onclick="openQuickHealthModal('weight')">
+                                <span class="icon">⚖️</span>
+                                <span data-i18n="health_weight">Peso</span>
+                            </button>
+                            <button class="quick-health-btn heart" onclick="openQuickHealthModal('heart_rate')">
+                                <span class="icon">💓</span>
+                                <span data-i18n="health_heart_rate">Batimentos</span>
+                            </button>
+                            <button class="quick-health-btn temp" onclick="openQuickHealthModal('temperature')">
+                                <span class="icon">🌡️</span>
+                                <span data-i18n="health_temperature">Temp.</span>
+                            </button>
+                            <button class="quick-health-btn oxygen" onclick="openQuickHealthModal('oxygen')">
+                                <span class="icon">💨</span>
+                                <span data-i18n="health_oxygen">Oxigénio</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Histórico recente -->
+                        <div class="health-summary-section">
+                            <div class="health-summary-title" data-i18n="health_history">Histórico</div>
+                            <div id="health-records-list"></div>
+                        </div>
+                    </main>
+                </div>
+
                 <!-- Settings Screen -->
                 <div id="screen-settings" class="screen">
                     <main class="main-content" style="padding-top: 20px;">
@@ -1179,10 +1880,102 @@
                             <div id="language-selector" class="language-grid"></div>
                         </div>
                         
+                        <!-- Notification Settings -->
+                        <div class="settings-section">
+                            <div class="settings-label" data-i18n="settings_notifications">Notificações</div>
+                            <div class="settings-sublabel" data-i18n="settings_notify_family_label">Alertar família quando:</div>
+                            <div class="notification-options" id="notification-options">
+                                <label class="notification-option">
+                                    <input type="radio" name="notify_level" value="all" checked onchange="saveNotificationSettings()">
+                                    <span class="option-text" data-i18n="settings_notify_all">Todas as notificações</span>
+                                </label>
+                                <label class="notification-option">
+                                    <input type="radio" name="notify_level" value="medication" onchange="saveNotificationSettings()">
+                                    <span class="option-text" data-i18n="settings_notify_medication">Só falhas de medicação</span>
+                                </label>
+                                <label class="notification-option">
+                                    <input type="radio" name="notify_level" value="emergency" onchange="saveNotificationSettings()">
+                                    <span class="option-text" data-i18n="settings_notify_emergency">Só emergências</span>
+                                </label>
+                                <label class="notification-option">
+                                    <input type="radio" name="notify_level" value="none" onchange="saveNotificationSettings()">
+                                    <span class="option-text" data-i18n="settings_notify_none">Nenhuma</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Medication Alert Timing -->
+                        <div class="settings-section">
+                            <div class="settings-label" data-i18n="alerts_config_title">Alertas de Medicação</div>
+                            <div class="settings-sublabel">Configure quando receber alertas se não tomar a medicação</div>
+                            
+                            <div class="alert-config-item">
+                                <div class="alert-config-label">
+                                    <span data-i18n="alerts_first_delay">Primeiro alerta após</span>
+                                </div>
+                                <div class="alert-config-control">
+                                    <select id="first-alert-delay" onchange="saveAlertConfig()">
+                                        <option value="5">5 min</option>
+                                        <option value="10">10 min</option>
+                                        <option value="15" selected>15 min</option>
+                                        <option value="30">30 min</option>
+                                        <option value="60">1 hora</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="alert-config-item">
+                                <div class="alert-config-label">
+                                    <span data-i18n="alerts_second_delay">Segundo alerta após</span>
+                                </div>
+                                <div class="alert-config-control">
+                                    <select id="second-alert-delay" onchange="saveAlertConfig()">
+                                        <option value="15">15 min</option>
+                                        <option value="30" selected>30 min</option>
+                                        <option value="45">45 min</option>
+                                        <option value="60">1 hora</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="alert-config-item">
+                                <div class="alert-config-label">
+                                    <span data-i18n="alerts_escalation">Avisar cuidadores após</span>
+                                </div>
+                                <div class="alert-config-control">
+                                    <select id="escalation-delay" onchange="saveAlertConfig()">
+                                        <option value="30">30 min</option>
+                                        <option value="60" selected>1 hora</option>
+                                        <option value="90">1h 30min</option>
+                                        <option value="120">2 horas</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="alert-config-toggles">
+                                <label class="toggle-option">
+                                    <input type="checkbox" id="notify-sound" checked onchange="saveAlertConfig()">
+                                    <span class="toggle-label" data-i18n="alerts_notify_sound">Som de alerta</span>
+                                </label>
+                                <label class="toggle-option">
+                                    <input type="checkbox" id="notify-vibration" checked onchange="saveAlertConfig()">
+                                    <span class="toggle-label" data-i18n="alerts_notify_vibration">Vibração</span>
+                                </label>
+                                <label class="toggle-option">
+                                    <input type="checkbox" id="notify-caregivers" checked onchange="saveAlertConfig()">
+                                    <span class="toggle-label" data-i18n="alerts_notify_caregivers">Notificar cuidadores</span>
+                                </label>
+                                <label class="toggle-option">
+                                    <input type="checkbox" id="notify-whatsapp" checked onchange="saveAlertConfig()">
+                                    <span class="toggle-label" data-i18n="alerts_notify_whatsapp">Enviar WhatsApp</span>
+                                </label>
+                            </div>
+                        </div>
+                        
                         <!-- Version -->
                         <div class="settings-section" style="margin-top: 40px; text-align: center;">
                             <div style="font-size: 16px; color: var(--text-secondary);">
-                                <span data-i18n="settings_version">Versão</span> 1.0.0
+                                <span data-i18n="settings_version">Versão</span> 1.2.0
                             </div>
                             <div style="font-size: 14px; color: #999; margin-top: 8px;">
                                 SeniorCare © 2024
@@ -1193,6 +1986,30 @@
 
                 <!-- Emergency Button -->
                 <button class="emergency-button" onclick="openEmergencyModal()">🆘</button>
+            </div>
+        </div>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="toast">
+            <span class="toast-icon">✓</span>
+            <span class="toast-message">Sucesso!</span>
+        </div>
+
+        <!-- Quick Health Record Modal -->
+        <div class="modal-overlay" id="quick-health-modal">
+            <div class="modal">
+                <div class="modal-header" id="quick-health-header" style="background: var(--health);">
+                    <span id="quick-health-title">❤️ Registar Medição</span>
+                    <button class="modal-close" onclick="closeModal('quick-health-modal')">✕</button>
+                </div>
+                <div class="modal-content">
+                    <div class="quick-input-container" id="quick-health-fields">
+                        <!-- Campos preenchidos dinamicamente -->
+                    </div>
+                    <button class="quick-save-btn" onclick="saveQuickHealthRecord()">
+                        ✓ <span data-i18n="save">Guardar</span>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -1235,6 +2052,100 @@
                 </div>
             </div>
         </div>
+
+        <!-- Add Appointment Modal -->
+        <div class="modal-overlay" id="add-appointment-modal">
+            <div class="modal">
+                <div class="modal-header" style="background: var(--appointments);">
+                    🏥 <span data-i18n="appointments_add">Marcar consulta</span>
+                    <button class="modal-close" onclick="closeModal('add-appointment-modal')">✕</button>
+                </div>
+                <div class="modal-content">
+                    <div class="form-group">
+                        <label data-i18n="appointments_doctor">Médico/Especialidade</label>
+                        <input type="text" id="appointment-doctor" class="form-input" placeholder="Ex: Dr. Silva - Cardiologia">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="appointments_date">Data</label>
+                        <input type="date" id="appointment-date" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="appointments_time">Hora</label>
+                        <input type="time" id="appointment-time" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="appointments_location">Local</label>
+                        <input type="text" id="appointment-location" class="form-input" placeholder="Ex: Hospital Santa Maria">
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="appointments_notes">Notas</label>
+                        <textarea id="appointment-notes" class="form-input" rows="2" placeholder="Notas adicionais..."></textarea>
+                    </div>
+                    <button class="form-submit appointments" onclick="saveAppointment()">
+                        ✓ <span data-i18n="save">Guardar</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Health Record Modal -->
+        <div class="modal-overlay" id="add-health-modal">
+            <div class="modal">
+                <div class="modal-header" style="background: var(--health);">
+                    ❤️ <span data-i18n="health_add">Novo registo</span>
+                    <button class="modal-close" onclick="closeModal('add-health-modal')">✕</button>
+                </div>
+                <div class="modal-content">
+                    <div class="health-type-selector" id="health-type-selector">
+                        <button class="health-type-btn active" data-type="blood_pressure" onclick="selectHealthType('blood_pressure')">
+                            🩸 <span data-i18n="health_blood_pressure">Tensão</span>
+                        </button>
+                        <button class="health-type-btn" data-type="glucose" onclick="selectHealthType('glucose')">
+                            🍬 <span data-i18n="health_glucose">Glicemia</span>
+                        </button>
+                        <button class="health-type-btn" data-type="weight" onclick="selectHealthType('weight')">
+                            ⚖️ <span data-i18n="health_weight">Peso</span>
+                        </button>
+                        <button class="health-type-btn" data-type="temperature" onclick="selectHealthType('temperature')">
+                            🌡️ <span data-i18n="health_temperature">Temp.</span>
+                        </button>
+                        <button class="health-type-btn" data-type="oxygen" onclick="selectHealthType('oxygen')">
+                            💨 <span data-i18n="health_oxygen">Oxigénio</span>
+                        </button>
+                        <button class="health-type-btn" data-type="heart_rate" onclick="selectHealthType('heart_rate')">
+                            💓 <span data-i18n="health_heart_rate">Batimentos</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Blood Pressure fields -->
+                    <div id="health-fields-blood_pressure" class="health-fields">
+                        <div class="form-group">
+                            <label data-i18n="health_blood_pressure_sys">Sistólica (máx)</label>
+                            <input type="number" id="health-bp-sys" class="form-input form-input-large" placeholder="120">
+                            <span class="form-unit" data-i18n="health_unit_mmhg">mmHg</span>
+                        </div>
+                        <div class="form-group">
+                            <label data-i18n="health_blood_pressure_dia">Diastólica (mín)</label>
+                            <input type="number" id="health-bp-dia" class="form-input form-input-large" placeholder="80">
+                            <span class="form-unit" data-i18n="health_unit_mmhg">mmHg</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Single value fields -->
+                    <div id="health-fields-single" class="health-fields" style="display: none;">
+                        <div class="form-group">
+                            <label id="health-single-label">Valor</label>
+                            <input type="number" id="health-single-value" class="form-input form-input-large" step="0.1">
+                            <span class="form-unit" id="health-single-unit"></span>
+                        </div>
+                    </div>
+                    
+                    <button class="form-submit health" onclick="saveHealthRecord()">
+                        ✓ <span data-i18n="save">Guardar</span>
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -1246,7 +2157,13 @@
         let contacts = [];
         let activities = [];
         let chatMessages = [];
+        let appointments = [];
+        let healthRecords = [];
+        let notificationSettings = localStorage.getItem('seniorcare_notify') || 'all';
         let isListening = false;
+        let selectedHealthType = 'blood_pressure';
+        let notifiedMedications = new Set(); // Para não repetir notificações
+        let medicationCheckInterval = null;
 
         // ==================== INICIALIZAÇÃO ====================
         document.addEventListener('DOMContentLoaded', async () => {
@@ -1285,13 +2202,22 @@
             document.getElementById('loading-screen').style.display = 'none';
             document.getElementById('app-content').style.display = 'flex';
             
-            // Registar service worker
+            // Registar service worker e pedir permissão de notificações
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('/sw.js').catch(console.error);
             }
             
+            // Pedir permissão para notificações
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
+            
             // Heartbeat - atualizar atividade
             setInterval(updateActivity, 60000);
+            
+            // Verificar medicação em atraso a cada minuto
+            checkMedicationOverdue();
+            medicationCheckInterval = setInterval(checkMedicationOverdue, 60000);
         });
 
         // ==================== INTERNACIONALIZAÇÃO ====================
@@ -1354,7 +2280,7 @@
                 phone: '+351 912 345 678'
             };
             
-            // Dados demo
+            // Dados demo - Medicação
             medications = [
                 { id: 1, schedule_id: 1, name: 'Tensoval', dosage: '1 comprimido', time: '08:00', icon: '💊', taken: false },
                 { id: 2, schedule_id: 2, name: 'Vitamina D', dosage: '1 cápsula', time: '09:00', icon: '☀️', taken: false },
@@ -1362,12 +2288,14 @@
                 { id: 4, schedule_id: 4, name: 'Tensoval', dosage: '1 comprimido', time: '20:00', icon: '💊', taken: false },
             ];
             
+            // Dados demo - Contactos
             contacts = [
                 { id: 1, name: 'Maria', relationship: 'relation_daughter', phone: '+351 912 345 678', avatar: '👩' },
                 { id: 2, name: 'João', relationship: 'relation_son', phone: '+351 923 456 789', avatar: '👨' },
                 { id: 3, name: 'Dr. Silva', relationship: 'relation_doctor', phone: '+351 213 456 789', avatar: '👨‍⚕️' },
             ];
             
+            // Dados demo - Atividades
             activities = [
                 { id: 1, title: 'activity_walk', time: '07:30', icon: '🚶', done: true },
                 { id: 2, title: 'activity_medication', time: '08:00', icon: '💊', done: true },
@@ -1379,9 +2307,50 @@
                 { id: 8, title: 'activity_dinner', time: '19:00', icon: '🍽️', done: false },
             ];
             
+            // Dados demo - Consultas
+            const today = new Date();
+            const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+            const nextMonth = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+            
+            appointments = [
+                { 
+                    id: 1, 
+                    doctor: 'Dr. Silva - Cardiologia', 
+                    date: nextWeek.toISOString().split('T')[0], 
+                    time: '10:00', 
+                    location: 'Hospital Santa Maria',
+                    notes: 'Levar exames anteriores',
+                    done: false 
+                },
+                { 
+                    id: 2, 
+                    doctor: 'Dra. Santos - Oftalmologia', 
+                    date: nextMonth.toISOString().split('T')[0], 
+                    time: '15:30', 
+                    location: 'Clínica São João',
+                    notes: '',
+                    done: false 
+                },
+            ];
+            
+            // Dados demo - Registos de Saúde
+            healthRecords = [
+                { id: 1, type: 'blood_pressure', systolic: 128, diastolic: 82, date: new Date().toISOString() },
+                { id: 2, type: 'blood_pressure', systolic: 135, diastolic: 85, date: new Date(today.getTime() - 24*60*60*1000).toISOString() },
+                { id: 3, type: 'glucose', value: 98, date: new Date().toISOString() },
+                { id: 4, type: 'weight', value: 72.5, date: new Date().toISOString() },
+            ];
+            
             chatMessages = [
                 { role: 'assistant', content: i18n.t('companion_greeting') }
             ];
+            
+            // Carregar configuração de notificações
+            const savedNotify = localStorage.getItem('seniorcare_notify');
+            if (savedNotify) {
+                notificationSettings = savedNotify;
+                document.querySelector(`input[name="notify_level"][value="${savedNotify}"]`).checked = true;
+            }
             
             updateUI();
         }
@@ -1485,6 +2454,8 @@
             renderContacts();
             renderActivities();
             renderChat();
+            renderAppointments();
+            renderHealthRecords();
         }
 
         function renderMedications() {
@@ -1521,6 +2492,9 @@
                             <div class="medication-info">
                                 <div class="medication-name taken">${med.name} ✓</div>
                                 <div class="medication-details">${med.dosage} • ${med.time}</div>
+                                <button class="medication-undo-btn" onclick="undoMedication(${med.id}, ${med.schedule_id})">
+                                    ↩ ${i18n.t('medication_undo_btn')}
+                                </button>
                             </div>
                         </div>
                     `;
@@ -1580,10 +2554,7 @@
         }
 
         // ==================== NAVEGAÇÃO ====================
-        function showScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(`screen-${screenId}`).classList.add('active');
-        }
+        // Nota: função showScreen está na secção CONFIGURAÇÕES com lógica adicional
 
         function openModal(modalId) {
             document.getElementById(modalId).classList.add('active');
@@ -1605,7 +2576,10 @@
         async function takeMedication(medId, scheduleId) {
             // Atualizar UI imediatamente
             const med = medications.find(m => m.id === medId && m.schedule_id === scheduleId);
-            if (med) med.taken = true;
+            if (med) {
+                med.taken = true;
+                showToast('✓ ' + med.name + ' - ' + i18n.t('medication_taken'), 'success');
+            }
             updateUI();
             
             // Enviar para API
@@ -1636,7 +2610,7 @@
 
         async function callEmergency() {
             closeModal('emergency-modal');
-            alert('A ligar para o 112...');
+            showToast(i18n.t('emergency_calling'), 'warning', 5000);
             // window.location.href = 'tel:112';
             
             // Registar alerta
@@ -1654,7 +2628,7 @@
 
         async function alertFamily() {
             closeModal('emergency-modal');
-            alert('A notificar a família...');
+            showToast(i18n.t('emergency_alerting'), 'success', 4000);
             
             // Registar alerta e notificar
             if (authToken) {
@@ -1725,11 +2699,622 @@
             
             if (isListening) {
                 btn.classList.add('listening');
-                text.textContent = 'A ouvir... Toque para parar';
+                text.textContent = i18n.t('companion_listening');
                 // Em produção, iniciaria reconhecimento de voz
             } else {
                 btn.classList.remove('listening');
-                text.textContent = 'Tocar para falar';
+                text.textContent = i18n.t('companion_tap_speak');
+            }
+        }
+
+        // ==================== DESFAZER MEDICAÇÃO ====================
+        function undoMedication(medId, scheduleId) {
+            const med = medications.find(m => m.id === medId && m.schedule_id === scheduleId);
+            if (med) {
+                med.taken = false;
+                // Remover da lista de notificados para poder notificar novamente
+                notifiedMedications.delete(`${medId}-${scheduleId}`);
+                updateUI();
+            }
+            
+            // Enviar para API (se disponível)
+            if (authToken) {
+                fetch(`${API_URL}/medications/${medId}/undo`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ schedule_id: scheduleId })
+                }).catch(console.error);
+            }
+        }
+
+        // ==================== VERIFICAÇÃO DE MEDICAÇÃO EM ATRASO ====================
+        function checkMedicationOverdue() {
+            const now = new Date();
+            const currentMinutes = now.getHours() * 60 + now.getMinutes();
+            
+            medications.forEach(med => {
+                if (med.taken) return; // Já foi tomada
+                
+                const [hours, mins] = med.time.split(':').map(Number);
+                const medMinutes = hours * 60 + mins;
+                const delayMinutes = currentMinutes - medMinutes;
+                
+                // Se passaram 5 minutos após a hora
+                if (delayMinutes >= 5 && delayMinutes < 60) {
+                    const notifKey = `${med.id}-${med.schedule_id}`;
+                    
+                    // Só notificar uma vez
+                    if (!notifiedMedications.has(notifKey)) {
+                        notifiedMedications.add(notifKey);
+                        sendMedicationOverdueNotification(med);
+                    }
+                }
+            });
+        }
+
+        function sendMedicationOverdueNotification(med) {
+            // Verificar configurações de notificação
+            if (notificationSettings === 'none') return;
+            if (notificationSettings === 'emergency') return; // Só emergências
+            
+            // Notificação local para o utilizador
+            showLocalNotification(
+                i18n.t('medication_missed'),
+                `${med.name} - ${i18n.t('medication_missed_msg')}`
+            );
+            
+            // Alertar família (se configurado)
+            if (notificationSettings === 'all' || notificationSettings === 'medication') {
+                notifyFamilyMedicationMissed(med);
+            }
+        }
+
+        function showLocalNotification(title, body) {
+            // Mostrar alerta visual na app
+            showInAppAlert(title, body);
+            
+            // Notificação do browser (se permitida)
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification(title, {
+                    body: body,
+                    icon: '/static/icons/icon-192.png',
+                    tag: 'medication-reminder',
+                    requireInteraction: true
+                });
+            }
+        }
+
+        function showInAppAlert(title, body) {
+            // Criar alerta visual na app
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'in-app-alert';
+            alertDiv.innerHTML = `
+                <div class="alert-icon">⚠️</div>
+                <div class="alert-content">
+                    <div class="alert-title">${title}</div>
+                    <div class="alert-body">${body}</div>
+                </div>
+                <button class="alert-close" onclick="this.parentElement.remove()">✕</button>
+            `;
+            
+            // Remover alertas anteriores do mesmo tipo
+            document.querySelectorAll('.in-app-alert').forEach(el => el.remove());
+            
+            document.body.appendChild(alertDiv);
+            
+            // Remover após 10 segundos
+            setTimeout(() => alertDiv.remove(), 10000);
+        }
+
+        function notifyFamilyMedicationMissed(med) {
+            console.log(`📱 Alertando família: ${med.name} não foi tomado às ${med.time}`);
+            
+            // Enviar para API (que enviará SMS/WhatsApp)
+            if (authToken) {
+                fetch(`${API_URL}/notifications/family`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        type: 'medication_missed',
+                        medication: med.name,
+                        scheduled_time: med.time,
+                        user_name: currentUser?.name
+                    })
+                }).catch(console.error);
+            }
+        }
+
+        // ==================== CONSULTAS ====================
+        function renderAppointments() {
+            const container = document.getElementById('appointments-list');
+            if (!container) return;
+            
+            const upcoming = appointments.filter(a => !a.done).sort((a, b) => new Date(a.date) - new Date(b.date));
+            const past = appointments.filter(a => a.done);
+            
+            let html = '';
+            
+            if (upcoming.length > 0) {
+                html += `<h3 class="section-title">${i18n.t('appointments_upcoming')}</h3>`;
+                upcoming.forEach((apt, i) => {
+                    const date = new Date(apt.date);
+                    const formattedDate = date.toLocaleDateString(i18n.getLanguage());
+                    html += `
+                        <div class="appointment-item" style="animation-delay: ${i * 0.1}s">
+                            <div class="appointment-header">
+                                <div class="appointment-icon">🏥</div>
+                                <div>
+                                    <div class="appointment-doctor">${apt.doctor}</div>
+                                </div>
+                            </div>
+                            <div class="appointment-details">
+                                📅 ${formattedDate} ${i18n.t('medication_at')} ${apt.time}<br>
+                                📍 ${apt.location}
+                                ${apt.notes ? `<br>📝 ${apt.notes}` : ''}
+                            </div>
+                            <div class="appointment-actions">
+                                <button class="appointment-btn done-btn" onclick="markAppointmentDone(${apt.id})">
+                                    ✓ ${i18n.t('appointments_mark_done')}
+                                </button>
+                                <button class="appointment-btn delete-btn" onclick="deleteAppointment(${apt.id})">
+                                    🗑️
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            if (past.length > 0) {
+                html += `<h3 class="section-title">${i18n.t('appointments_past')} ✓</h3>`;
+                past.forEach(apt => {
+                    const date = new Date(apt.date);
+                    const formattedDate = date.toLocaleDateString(i18n.getLanguage());
+                    html += `
+                        <div class="appointment-item done">
+                            <div class="appointment-header">
+                                <div class="appointment-icon">✓</div>
+                                <div>
+                                    <div class="appointment-doctor">${apt.doctor}</div>
+                                </div>
+                            </div>
+                            <div class="appointment-details">
+                                📅 ${formattedDate} ${i18n.t('medication_at')} ${apt.time}
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            if (appointments.length === 0) {
+                html = `<div class="empty-state" style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                    <div style="font-size: 48px; margin-bottom: 16px;">📋</div>
+                    <div style="font-size: 18px;">${i18n.t('appointments_none')}</div>
+                </div>`;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        function openAddAppointmentModal() {
+            // Limpar formulário
+            document.getElementById('appointment-doctor').value = '';
+            document.getElementById('appointment-date').value = '';
+            document.getElementById('appointment-time').value = '';
+            document.getElementById('appointment-location').value = '';
+            document.getElementById('appointment-notes').value = '';
+            openModal('add-appointment-modal');
+        }
+
+        function saveAppointment() {
+            const doctor = document.getElementById('appointment-doctor').value;
+            const date = document.getElementById('appointment-date').value;
+            const time = document.getElementById('appointment-time').value;
+            const location = document.getElementById('appointment-location').value;
+            const notes = document.getElementById('appointment-notes').value;
+            
+            if (!doctor || !date || !time) {
+                showToast(i18n.t('error') + ': Preencha os campos obrigatórios', 'error');
+                return;
+            }
+            
+            const newAppointment = {
+                id: Date.now(),
+                doctor,
+                date,
+                time,
+                location,
+                notes,
+                done: false
+            };
+            
+            appointments.push(newAppointment);
+            closeModal('add-appointment-modal');
+            renderAppointments();
+            showToast(i18n.t('success') + '! ' + i18n.t('appointments_add'), 'success');
+        }
+
+        function markAppointmentDone(id) {
+            const apt = appointments.find(a => a.id === id);
+            if (apt) apt.done = true;
+            renderAppointments();
+        }
+
+        function deleteAppointment(id) {
+            appointments = appointments.filter(a => a.id !== id);
+            renderAppointments();
+        }
+
+        // ==================== TOAST NOTIFICATIONS ====================
+        function showToast(message, type = 'success', duration = 3000) {
+            const toast = document.getElementById('toast');
+            const icon = toast.querySelector('.toast-icon');
+            const msg = toast.querySelector('.toast-message');
+            
+            // Definir ícone e cor
+            const icons = { success: '✓', warning: '⚠️', error: '✕' };
+            icon.textContent = icons[type] || '✓';
+            msg.textContent = message;
+            
+            // Limpar classes anteriores e adicionar nova
+            toast.className = 'toast ' + type;
+            
+            // Mostrar
+            setTimeout(() => toast.classList.add('show'), 10);
+            
+            // Esconder após duration
+            setTimeout(() => toast.classList.remove('show'), duration);
+        }
+
+        // ==================== REGISTO RÁPIDO DE SAÚDE ====================
+        let quickHealthType = '';
+        
+        function openQuickHealthModal(type) {
+            quickHealthType = type;
+            const container = document.getElementById('quick-health-fields');
+            const header = document.getElementById('quick-health-header');
+            const title = document.getElementById('quick-health-title');
+            
+            const configs = {
+                blood_pressure: {
+                    icon: '🩸',
+                    label: i18n.t('health_blood_pressure'),
+                    color: '#C62828',
+                    fields: [
+                        { id: 'quick-bp-sys', label: i18n.t('health_blood_pressure_sys'), unit: 'mmHg', placeholder: '120' },
+                        { id: 'quick-bp-dia', label: i18n.t('health_blood_pressure_dia'), unit: 'mmHg', placeholder: '80' }
+                    ]
+                },
+                glucose: {
+                    icon: '🍬',
+                    label: i18n.t('health_glucose'),
+                    color: '#F57C00',
+                    fields: [
+                        { id: 'quick-glucose', label: i18n.t('health_glucose'), unit: 'mg/dL', placeholder: '100' }
+                    ]
+                },
+                weight: {
+                    icon: '⚖️',
+                    label: i18n.t('health_weight'),
+                    color: '#0288D1',
+                    fields: [
+                        { id: 'quick-weight', label: i18n.t('health_weight'), unit: 'kg', placeholder: '70', step: '0.1' }
+                    ]
+                },
+                temperature: {
+                    icon: '🌡️',
+                    label: i18n.t('health_temperature'),
+                    color: '#388E3C',
+                    fields: [
+                        { id: 'quick-temp', label: i18n.t('health_temperature'), unit: '°C', placeholder: '36.5', step: '0.1' }
+                    ]
+                },
+                oxygen: {
+                    icon: '💨',
+                    label: i18n.t('health_oxygen'),
+                    color: '#1976D2',
+                    fields: [
+                        { id: 'quick-oxygen', label: i18n.t('health_oxygen'), unit: '%', placeholder: '98' }
+                    ]
+                },
+                heart_rate: {
+                    icon: '💓',
+                    label: i18n.t('health_heart_rate'),
+                    color: '#C2185B',
+                    fields: [
+                        { id: 'quick-heart', label: i18n.t('health_heart_rate'), unit: 'bpm', placeholder: '72' }
+                    ]
+                }
+            };
+            
+            const config = configs[type];
+            header.style.background = config.color;
+            title.innerHTML = `${config.icon} ${config.label}`;
+            
+            // Gerar campos
+            container.innerHTML = config.fields.map(f => `
+                <div class="form-group">
+                    <label style="font-size: 18px; margin-bottom: 8px;">${f.label}</label>
+                    <div class="quick-input-field">
+                        <input type="number" id="${f.id}" class="quick-input" 
+                               placeholder="${f.placeholder}" step="${f.step || '1'}" inputmode="decimal">
+                        <span class="quick-input-unit">${f.unit}</span>
+                    </div>
+                </div>
+            `).join('');
+            
+            openModal('quick-health-modal');
+            
+            // Focar no primeiro campo
+            setTimeout(() => {
+                const firstInput = container.querySelector('input');
+                if (firstInput) firstInput.focus();
+            }, 300);
+        }
+        
+        function saveQuickHealthRecord() {
+            let newRecord = {
+                id: Date.now(),
+                type: quickHealthType,
+                date: new Date().toISOString()
+            };
+            
+            let valid = true;
+            
+            if (quickHealthType === 'blood_pressure') {
+                const sys = document.getElementById('quick-bp-sys').value;
+                const dia = document.getElementById('quick-bp-dia').value;
+                if (!sys || !dia) {
+                    showToast(i18n.t('error') + ': Preencha os valores', 'error');
+                    valid = false;
+                } else {
+                    newRecord.systolic = parseInt(sys);
+                    newRecord.diastolic = parseInt(dia);
+                }
+            } else {
+                const inputMap = {
+                    glucose: 'quick-glucose',
+                    weight: 'quick-weight',
+                    temperature: 'quick-temp',
+                    oxygen: 'quick-oxygen',
+                    heart_rate: 'quick-heart'
+                };
+                const value = document.getElementById(inputMap[quickHealthType])?.value;
+                if (!value) {
+                    showToast(i18n.t('error') + ': Preencha o valor', 'error');
+                    valid = false;
+                } else {
+                    newRecord.value = parseFloat(value);
+                }
+            }
+            
+            if (valid) {
+                healthRecords.push(newRecord);
+                closeModal('quick-health-modal');
+                renderHealthRecords();
+                showToast(i18n.t('success') + '! ' + i18n.t('health_add'), 'success');
+            }
+        }
+
+        // ==================== REGISTOS DE SAÚDE ====================
+        function renderHealthRecords() {
+            const container = document.getElementById('health-records-list');
+            if (!container) return;
+            
+            // Agrupar por tipo
+            const byType = {};
+            healthRecords.forEach(r => {
+                if (!byType[r.type]) byType[r.type] = [];
+                byType[r.type].push(r);
+            });
+            
+            const typeConfig = {
+                blood_pressure: { icon: '🩸', label: 'health_blood_pressure' },
+                glucose: { icon: '🍬', label: 'health_glucose', unit: 'health_unit_mgdl' },
+                weight: { icon: '⚖️', label: 'health_weight', unit: 'health_unit_kg' },
+                temperature: { icon: '🌡️', label: 'health_temperature', unit: 'health_unit_celsius' },
+                oxygen: { icon: '💨', label: 'health_oxygen', unit: 'health_unit_percent' },
+                heart_rate: { icon: '💓', label: 'health_heart_rate', unit: 'health_unit_bpm' },
+            };
+            
+            let html = '';
+            
+            Object.keys(byType).forEach(type => {
+                const records = byType[type].sort((a, b) => new Date(b.date) - new Date(a.date));
+                const latest = records[0];
+                const config = typeConfig[type] || { icon: '📊', label: type };
+                const date = new Date(latest.date);
+                const formattedDate = date.toLocaleDateString(i18n.getLanguage());
+                
+                let valueDisplay = '';
+                if (type === 'blood_pressure') {
+                    valueDisplay = `${latest.systolic}/${latest.diastolic} <span class="health-record-unit">${i18n.t('health_unit_mmhg')}</span>`;
+                } else {
+                    valueDisplay = `${latest.value} <span class="health-record-unit">${i18n.t(config.unit)}</span>`;
+                }
+                
+                html += `
+                    <div class="health-record-item">
+                        <div class="health-record-header">
+                            <div class="health-record-type">
+                                <div class="health-record-icon">${config.icon}</div>
+                                <div>
+                                    <div class="health-record-name">${i18n.t(config.label)}</div>
+                                    <div class="health-record-date">${i18n.t('health_last_record')}: ${formattedDate}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="health-record-value">${valueDisplay}</div>
+                    </div>
+                `;
+            });
+            
+            if (healthRecords.length === 0) {
+                html = `<div class="empty-state" style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                    <div style="font-size: 48px; margin-bottom: 16px;">❤️</div>
+                    <div style="font-size: 18px;">${i18n.t('health_no_records')}</div>
+                </div>`;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        function openAddHealthModal() {
+            selectedHealthType = 'blood_pressure';
+            selectHealthType('blood_pressure');
+            openModal('add-health-modal');
+        }
+
+        function selectHealthType(type) {
+            selectedHealthType = type;
+            
+            // Atualizar botões
+            document.querySelectorAll('.health-type-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.type === type) btn.classList.add('active');
+            });
+            
+            // Mostrar campos corretos
+            const bpFields = document.getElementById('health-fields-blood_pressure');
+            const singleFields = document.getElementById('health-fields-single');
+            
+            if (type === 'blood_pressure') {
+                bpFields.style.display = 'block';
+                singleFields.style.display = 'none';
+            } else {
+                bpFields.style.display = 'none';
+                singleFields.style.display = 'block';
+                
+                // Configurar label e unidade
+                const labelMap = {
+                    glucose: { label: 'health_glucose', unit: 'health_unit_mgdl' },
+                    weight: { label: 'health_weight', unit: 'health_unit_kg' },
+                    temperature: { label: 'health_temperature', unit: 'health_unit_celsius' },
+                    oxygen: { label: 'health_oxygen', unit: 'health_unit_percent' },
+                    heart_rate: { label: 'health_heart_rate', unit: 'health_unit_bpm' },
+                };
+                
+                const config = labelMap[type];
+                document.getElementById('health-single-label').textContent = i18n.t(config.label);
+                document.getElementById('health-single-unit').textContent = i18n.t(config.unit);
+            }
+        }
+
+        function saveHealthRecord() {
+            let newRecord = {
+                id: Date.now(),
+                type: selectedHealthType,
+                date: new Date().toISOString()
+            };
+            
+            if (selectedHealthType === 'blood_pressure') {
+                const sys = document.getElementById('health-bp-sys').value;
+                const dia = document.getElementById('health-bp-dia').value;
+                if (!sys || !dia) {
+                    alert('Preencha os valores');
+                    return;
+                }
+                newRecord.systolic = parseInt(sys);
+                newRecord.diastolic = parseInt(dia);
+                
+                // Limpar campos
+                document.getElementById('health-bp-sys').value = '';
+                document.getElementById('health-bp-dia').value = '';
+            } else {
+                const value = document.getElementById('health-single-value').value;
+                if (!value) {
+                    alert('Preencha o valor');
+                    return;
+                }
+                newRecord.value = parseFloat(value);
+                
+                // Limpar campo
+                document.getElementById('health-single-value').value = '';
+            }
+            
+            healthRecords.push(newRecord);
+            closeModal('add-health-modal');
+            renderHealthRecords();
+        }
+
+        // ==================== CONFIGURAÇÕES ====================
+        function saveNotificationSettings() {
+            const selected = document.querySelector('input[name="notify_level"]:checked');
+            if (selected) {
+                notificationSettings = selected.value;
+                localStorage.setItem('seniorcare_notify', notificationSettings);
+                console.log('Notificações configuradas:', notificationSettings);
+            }
+        }
+        
+        function saveAlertConfig() {
+            const config = {
+                first_alert_delay: parseInt(document.getElementById('first-alert-delay')?.value || 15),
+                second_alert_delay: parseInt(document.getElementById('second-alert-delay')?.value || 30),
+                escalation_delay: parseInt(document.getElementById('escalation-delay')?.value || 60),
+                notify_user_sound: document.getElementById('notify-sound')?.checked ?? true,
+                notify_user_vibration: document.getElementById('notify-vibration')?.checked ?? true,
+                notify_caregivers: document.getElementById('notify-caregivers')?.checked ?? true,
+                notify_via_whatsapp: document.getElementById('notify-whatsapp')?.checked ?? true,
+            };
+            
+            // Guardar localmente
+            localStorage.setItem('seniorcare_alert_config', JSON.stringify(config));
+            
+            // Enviar para API se autenticado
+            if (authToken) {
+                fetch(`${API_URL}/alerts/config`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(config)
+                }).catch(console.error);
+            }
+            
+            console.log('Configuração de alertas guardada:', config);
+        }
+        
+        function loadAlertConfig() {
+            // Carregar da localStorage
+            const saved = localStorage.getItem('seniorcare_alert_config');
+            if (saved) {
+                const config = JSON.parse(saved);
+                
+                // Aplicar valores aos elementos
+                const firstDelay = document.getElementById('first-alert-delay');
+                const secondDelay = document.getElementById('second-alert-delay');
+                const escalation = document.getElementById('escalation-delay');
+                const notifySound = document.getElementById('notify-sound');
+                const notifyVibration = document.getElementById('notify-vibration');
+                const notifyCaregivers = document.getElementById('notify-caregivers');
+                const notifyWhatsapp = document.getElementById('notify-whatsapp');
+                
+                if (firstDelay) firstDelay.value = config.first_alert_delay;
+                if (secondDelay) secondDelay.value = config.second_alert_delay;
+                if (escalation) escalation.value = config.escalation_delay;
+                if (notifySound) notifySound.checked = config.notify_user_sound;
+                if (notifyVibration) notifyVibration.checked = config.notify_user_vibration;
+                if (notifyCaregivers) notifyCaregivers.checked = config.notify_caregivers;
+                if (notifyWhatsapp) notifyWhatsapp.checked = config.notify_via_whatsapp;
+            }
+        }
+        
+        // Carregar configurações quando ir para definições
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(`screen-${screenId}`).classList.add('active');
+            
+            // Carregar configurações de alertas quando abrir definições
+            if (screenId === 'settings') {
+                loadAlertConfig();
             }
         }
     </script>
