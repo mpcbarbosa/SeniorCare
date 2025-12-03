@@ -1,67 +1,144 @@
-# SeniorCare Backend API
+# SeniorCare 💚
 
-A FastAPI backend for the SeniorCare mobile app, designed to be deployed on Render.
+**Companheiro de Cuidado para Idosos** - Uma aplicação mobile PWA que proporciona autonomia, segurança e companhia a pessoas idosas.
 
-## Features
+## 🎯 Funcionalidades
 
-- User management with roles (senior, caregiver)
-- PostgreSQL database integration
-- RESTful API endpoints
-- Ready for deployment on Render
+### MVP (Fase 1)
+- ✅ Interface ultra-simples para idosos
+- ✅ Gestão de medicação com lembretes
+- ✅ Contactos de família com chamada rápida
+- ✅ Botão de emergência sempre visível
+- ✅ Rotina diária
+- ✅ Conversa/Companhia
+- ✅ PWA (instalável no telemóvel)
+- ✅ Funciona offline
 
-## Local Development
+### Próximas Fases
+- 🔜 Integração com Claude AI para conversas inteligentes
+- 🔜 Notificações push para lembretes
+- 🔜 Alertas para familiares via WhatsApp/SMS
+- 🔜 Painel do cuidador
+- 🔜 Deteção de inatividade
+- 🔜 Reconhecimento de voz
 
-1. Clone or set up the project.
+## 🚀 Deploy no Render
 
-2. Create a virtual environment:
+### Pré-requisitos
+- Conta no [Render](https://render.com)
+- Repositório GitHub
+
+### Configuração
+
+1. **Web Service**
+   - Runtime: Python 3
+   - Build Command: `pip install -r requirements.txt`
+   - Start Command: `gunicorn app:app`
+
+2. **Base de Dados PostgreSQL**
+   - Criar PostgreSQL no Render
+   - Copiar Internal Database URL
+
+3. **Variáveis de Ambiente** (no Render)
    ```
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   DATABASE_URL=<Internal Database URL>
+   SECRET_KEY=<gerar chave segura>
    ```
 
-3. Install dependencies:
-   ```
-   pip install -r requirements.txt
-   ```
+### Deploy
+O Render faz deploy automático a cada push no branch `master`.
 
-4. Set up environment variables:
-   - Copy `.env.example` to `.env`
-   - Update the values, especially `DATABASE_URL` for your local PostgreSQL database.
+## 💻 Desenvolvimento Local
 
-5. Run the application:
-   ```
-   python run.py
-   ```
+```bash
+# Clonar repositório
+git clone https://github.com/mpcbarbosa/SeniorCare.git
+cd SeniorCare
 
-   The API will be available at `http://localhost:8000`
+# Criar ambiente virtual
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+venv\Scripts\activate     # Windows
 
-## API Endpoints
+# Instalar dependências
+pip install -r requirements.txt
 
-- `GET /` - Welcome message
-- `POST /api/users/` - Create a new user
-- `GET /api/users/{user_id}` - Get user by ID
-- `GET /api/users/` - List all users
+# Configurar variáveis
+cp .env.example .env
+# Editar .env com as suas configurações
 
-## Deployment to Render
+# Inicializar base de dados
+python -c "from app import init_db; init_db()"
 
-1. Push this code to a Git repository (e.g., GitHub).
+# Executar
+python app.py
+```
 
-2. In your Render dashboard, create a new Web Service from your repository.
+Aceder em: http://localhost:5000
 
-3. Render will use the `render.yaml` file for configuration.
+## 📱 Instalar no Telemóvel
 
-4. Set the `DATABASE_URL` environment variable in Render to point to your PostgreSQL database (you can use Render's managed PostgreSQL or an external one).
+1. Aceder à URL da aplicação no browser do telemóvel
+2. Tocar em "Adicionar ao ecrã inicial" (iOS Safari) ou "Instalar app" (Android Chrome)
+3. A app fica disponível como uma aplicação nativa
 
-5. Deploy the service.
+## 🏗 Estrutura do Projeto
 
-## Database
+```
+SeniorCare/
+├── app.py              # Aplicação Flask principal
+├── requirements.txt    # Dependências Python
+├── templates/
+│   └── index.html      # Frontend PWA (React inline)
+├── static/
+│   ├── manifest.json   # Configuração PWA
+│   ├── sw.js          # Service Worker
+│   └── icons/         # Ícones da app
+├── migrations/        # Migrações da BD
+├── .env.example       # Exemplo de variáveis
+└── README.md
+```
 
-The app uses SQLAlchemy with PostgreSQL. Tables are created automatically on startup.
+## 🔌 API Endpoints
 
-For production, ensure your database is properly configured and secured.
+### Autenticação
+- `POST /api/auth/register` - Registar utilizador
+- `POST /api/auth/login` - Login
 
-## Notes
+### Utilizador
+- `GET /api/user/profile` - Obter perfil
+- `POST /api/user/activity` - Heartbeat
 
-- Password hashing is not implemented; add proper security for production.
-- Add authentication middleware as needed.
-- Expand models and routes based on app requirements.
+### Medicação
+- `GET /api/medications` - Listar medicamentos
+- `GET /api/medications/today` - Medicação de hoje
+- `POST /api/medications/<id>/take` - Marcar como tomado
+
+### Contactos
+- `GET /api/contacts` - Listar contactos
+- `POST /api/contacts` - Adicionar contacto
+
+### Alertas
+- `POST /api/alerts/emergency` - Criar alerta de emergência
+
+### Chat
+- `GET /api/chat/messages` - Histórico
+- `POST /api/chat/send` - Enviar mensagem
+
+## 🎨 Design
+
+A interface foi desenhada com foco em:
+- **Botões muito grandes** (mínimo 140px)
+- **Texto legível** (20-42px)
+- **Alto contraste** de cores
+- **Poucos elementos** por ecrã
+- **Ícones intuitivos** (emojis)
+- **Zero curva de aprendizagem**
+
+## 📄 Licença
+
+MIT License - Uso livre para fins não comerciais.
+
+## 👥 Contacto
+
+Desenvolvido por Miguel Barbosa
