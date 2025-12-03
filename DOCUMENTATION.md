@@ -31,8 +31,8 @@ python -m venv venv
 # Ativar ambiente virtual
 .\venv\Scripts\Activate
 
-# Instalar dependências
-pip install -r requirements.txt
+# Instalar dependências (usar requirements-dev.txt no Windows!)
+pip install -r requirements-dev.txt
 
 # Executar localmente
 python app.py
@@ -45,6 +45,8 @@ git add .
 git commit -m "mensagem"
 git push origin master
 ```
+
+> **Nota Windows:** Usar `requirements-dev.txt` em vez de `requirements.txt` porque o psycopg2-binary não compila facilmente no Windows. O ficheiro dev usa psycopg3 que funciona sem problemas.
 
 ---
 
@@ -125,7 +127,8 @@ SeniorCare/
 │                          # - Rotas API
 │                          # - Autenticação JWT
 │
-├── requirements.txt       # Dependências Python
+├── requirements.txt       # Dependências para PRODUÇÃO (Render/Linux)
+├── requirements-dev.txt   # Dependências para DESENVOLVIMENTO (Windows)
 │
 ├── templates/
 │   └── index.html         # Frontend PWA completo
