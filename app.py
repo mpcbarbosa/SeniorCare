@@ -1,16 +1,19 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from app.database import engine
-from app.models import user, medication, routine  # Import models to create tables
-from app.routes import users, medications, routines, ai
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Import here to avoid import time issues
+    from app.database import engine
+    from app.models import user, medication, routine  # Import models to create tables
     # Create tables on startup
     user.Base.metadata.create_all(bind=engine)
     yield
 
 app = FastAPI(title="SeniorCare API", version="1.0.0", lifespan=lifespan)
+
+# Import routes after app definition
+from app.routes import users, medications, routines, ai
 
 app.include_router(users.router, prefix="/api", tags=["users"])
 app.include_router(medications.router, prefix="/api", tags=["medications"])
