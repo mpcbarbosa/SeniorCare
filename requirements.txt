@@ -16,3 +16,6 @@ Werkzeug==3.0.1
 
 # Utilitários
 python-dotenv==1.0.0
+
+# Notificações WhatsApp
+twilio==9.3.0

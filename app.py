@@ -15,12 +15,34 @@ from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 
+# Twilio para notificações WhatsApp
+try:
+    from twilio.rest import Client as TwilioClient
+    TWILIO_AVAILABLE = True
+except ImportError:
+    TWILIO_AVAILABLE = False
+    print("Aviso: Twilio não instalado. Notificações WhatsApp desativadas.")
+
 # Inicialização da app
 app = Flask(__name__, static_folder='static', template_folder='templates')
 CORS(app)
 
 # Configuração
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
+
+# ==================== CONFIGURAÇÃO TWILIO ====================
+TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID')
+TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN')
+TWILIO_WHATSAPP_FROM = os.environ.get('TWILIO_WHATSAPP_FROM', 'whatsapp:+14155238886')  # Sandbox default
+
+# Inicializar cliente Twilio
+twilio_client = None
+if TWILIO_AVAILABLE and TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN:
+    try:
+        twilio_client = TwilioClient(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+        print(f"Twilio inicializado com sucesso!")
+    except Exception as e:
+        print(f"Erro ao inicializar Twilio: {e}")
 
 # Configurar DATABASE_URL
 database_url = os.environ.get('DATABASE_URL', '')
@@ -478,6 +500,227 @@ def generate_token(user_id, user_type='user', expires_hours=24*30):
     }, app.config['SECRET_KEY'], algorithm='HS256')
 
 
+# ==================== SERVIÇO DE NOTIFICAÇÕES WHATSAPP ====================
+
+def send_whatsapp_message(to_phone, message, user_id=None):
+    """
+    Enviar mensagem WhatsApp via Twilio
+    
+    Args:
+        to_phone: Número de telefone (com código do país, ex: +351912345678)
+        message: Texto da mensagem
+        user_id: ID do utilizador (para logging)
+    
+    Returns:
+        dict: {'success': bool, 'message_sid': str ou None, 'error': str ou None}
+    """
+    if not twilio_client:
+        print(f"WhatsApp não configurado. Mensagem não enviada: {message}")
+        return {'success': False, 'error': 'Twilio não configurado'}
+    
+    try:
+        # Formatar número para WhatsApp
+        whatsapp_to = f"whatsapp:{to_phone}" if not to_phone.startswith('whatsapp:') else to_phone
+        
+        # Enviar mensagem
+        twilio_message = twilio_client.messages.create(
+            body=message,
+            from_=TWILIO_WHATSAPP_FROM,
+            to=whatsapp_to
+        )
+        
+        # Registar no log de notificações
+        if user_id:
+            try:
+                log = NotificationLog(
+                    user_id=user_id,
+                    notification_type='whatsapp',
+                    message=message,
+                    channel='whatsapp',
+                    sent_to=to_phone,
+                    status='sent',
+                    sent_at=datetime.utcnow()
+                )
+                db.session.add(log)
+                db.session.commit()
+            except Exception as e:
+                print(f"Erro ao registar log: {e}")
+        
+        print(f"WhatsApp enviado para {to_phone}: {twilio_message.sid}")
+        return {'success': True, 'message_sid': twilio_message.sid}
+        
+    except Exception as e:
+        print(f"Erro ao enviar WhatsApp para {to_phone}: {e}")
+        
+        # Registar falha
+        if user_id:
+            try:
+                log = NotificationLog(
+                    user_id=user_id,
+                    notification_type='whatsapp',
+                    message=message,
+                    channel='whatsapp',
+                    sent_to=to_phone,
+                    status='failed',
+                )
+                db.session.add(log)
+                db.session.commit()
+            except:
+                pass
+        
+        return {'success': False, 'error': str(e)}
+
+
+def notify_caregivers(user_id, notification_type, message):
+    """
+    Notificar todos os cuidadores de um utilizador
+    
+    Args:
+        user_id: ID do utilizador (idoso)
+        notification_type: 'medication_missed', 'emergency', 'appointment_reminder', etc.
+        message: Texto da notificação
+    
+    Returns:
+        list: Lista de resultados de envio
+    """
+    results = []
+    
+    # Obter cuidadores do utilizador
+    caregiver_users = CaregiverUser.query.filter_by(
+        user_id=user_id,
+        notify_alerts=True
+    ).all()
+    
+    for cu in caregiver_users:
+        caregiver = Caregiver.query.get(cu.caregiver_id)
+        if caregiver and caregiver.phone:
+            result = send_whatsapp_message(
+                to_phone=caregiver.phone,
+                message=message,
+                user_id=user_id
+            )
+            results.append({
+                'caregiver_id': caregiver.id,
+                'caregiver_name': caregiver.name,
+                **result
+            })
+    
+    # Se não houver cuidadores registados, tentar contactos de emergência
+    if not results:
+        contacts = Contact.query.filter_by(
+            user_id=user_id,
+            is_emergency=True
+        ).all()
+        
+        for contact in contacts:
+            if contact.phone:
+                result = send_whatsapp_message(
+                    to_phone=contact.phone,
+                    message=message,
+                    user_id=user_id
+                )
+                results.append({
+                    'contact_id': contact.id,
+                    'contact_name': contact.name,
+                    **result
+                })
+    
+    return results
+
+
+def send_medication_reminder(user_id, medication_name, scheduled_time, alert_level='first'):
+    """
+    Enviar lembrete de medicação
+    
+    Args:
+        user_id: ID do utilizador
+        medication_name: Nome do medicamento
+        scheduled_time: Hora agendada
+        alert_level: 'first', 'second', 'escalation'
+    """
+    user = User.query.get(user_id)
+    if not user:
+        return
+    
+    # Obter configuração de alertas
+    config = MedicationAlertConfig.query.filter_by(
+        user_id=user_id,
+        medication_id=None
+    ).first()
+    
+    if not config or not config.is_active:
+        return
+    
+    # Mensagens por nível
+    if alert_level == 'first':
+        message = f"⏰ Lembrete: {user.name}, está na hora de tomar {medication_name} (agendado para {scheduled_time})."
+    elif alert_level == 'second':
+        message = f"⚠️ Segundo aviso: {user.name} ainda não tomou {medication_name}. Por favor, tome a medicação."
+    else:  # escalation
+        message = f"🚨 ALERTA: {user.name} não tomou a medicação {medication_name} (agendada para {scheduled_time}). Verifique se está tudo bem."
+    
+    # Para o utilizador (se tiver telefone)
+    if user.phone and config.notify_via_whatsapp:
+        send_whatsapp_message(user.phone, message, user_id)
+    
+    # Para cuidadores (apenas na escalação ou se configurado)
+    if alert_level == 'escalation' and config.notify_caregivers:
+        notify_caregivers(user_id, 'medication_missed', message)
+
+
+def send_emergency_alert(user_id, alert_type='emergency', custom_message=None):
+    """
+    Enviar alerta de emergência para todos os cuidadores
+    
+    Args:
+        user_id: ID do utilizador
+        alert_type: 'emergency', 'fall', 'inactivity'
+        custom_message: Mensagem personalizada (opcional)
+    """
+    user = User.query.get(user_id)
+    if not user:
+        return []
+    
+    # Mensagens por tipo
+    messages = {
+        'emergency': f"🚨 EMERGÊNCIA: {user.name} ativou o botão de emergência! Por favor, contacte-o imediatamente.",
+        'fall': f"⚠️ ALERTA DE QUEDA: Foi detetada uma possível queda de {user.name}. Verifique se está bem.",
+        'inactivity': f"⚠️ INATIVIDADE: {user.name} não interage com a app há algum tempo. Pode verificar se está tudo bem?",
+    }
+    
+    message = custom_message or messages.get(alert_type, messages['emergency'])
+    
+    return notify_caregivers(user_id, alert_type, message)
+
+
+def send_appointment_reminder(user_id, appointment):
+    """
+    Enviar lembrete de consulta
+    
+    Args:
+        user_id: ID do utilizador
+        appointment: Objeto Appointment
+    """
+    user = User.query.get(user_id)
+    if not user:
+        return
+    
+    date_str = appointment.appointment_date.strftime('%d/%m/%Y')
+    time_str = appointment.appointment_time.strftime('%H:%M')
+    
+    message = f"📅 Lembrete de consulta:\n\n{appointment.title}\n📍 {appointment.location or 'Local não especificado'}\n🗓️ {date_str} às {time_str}"
+    
+    if appointment.notes:
+        message += f"\n📝 {appointment.notes}"
+    
+    # Enviar para o utilizador
+    if user.phone:
+        send_whatsapp_message(user.phone, message, user_id)
+    
+    # Enviar também para cuidadores
+    notify_caregivers(user_id, 'appointment_reminder', f"Lembrete: {user.name} tem consulta amanhã - {appointment.title} às {time_str}")
+
+
 # ==================== ROTAS - FRONTEND ====================
 
 @app.route('/')
@@ -783,7 +1026,7 @@ def add_activity(current_user):
 @app.route('/api/alerts/emergency', methods=['POST'])
 @token_required
 def create_emergency(current_user):
-    """Criar alerta de emergência"""
+    """Criar alerta de emergência e notificar cuidadores"""
     data = request.get_json()
     
     alert = Alert(
@@ -795,9 +1038,17 @@ def create_emergency(current_user):
     db.session.add(alert)
     db.session.commit()
     
-    # TODO: Enviar notificações para cuidadores (WhatsApp, SMS, Push)
+    # Enviar notificações WhatsApp para cuidadores
+    notification_results = send_emergency_alert(
+        user_id=current_user.id,
+        alert_type='emergency',
+        custom_message=data.get('message')
+    )
     
-    return jsonify(alert.to_dict()), 201
+    return jsonify({
+        'alert': alert.to_dict(),
+        'notifications_sent': len([r for r in notification_results if r.get('success')])
+    }), 201
 
 
 @app.route('/api/alerts', methods=['GET'])
@@ -1271,6 +1522,114 @@ def get_notification_log(current_user):
         user_id=current_user.id
     ).order_by(NotificationLog.created_at.desc()).limit(limit).all()
     return jsonify([n.to_dict() for n in notifications])
+
+
+# ==================== NOTIFICAÇÕES WHATSAPP ====================
+
+@app.route('/api/notifications/whatsapp/status', methods=['GET'])
+def whatsapp_status():
+    """Verificar estado da integração WhatsApp"""
+    return jsonify({
+        'available': twilio_client is not None,
+        'configured': bool(TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN),
+        'from_number': TWILIO_WHATSAPP_FROM if twilio_client else None
+    })
+
+
+@app.route('/api/notifications/whatsapp/test', methods=['POST'])
+@token_required
+def test_whatsapp(current_user):
+    """Testar envio de WhatsApp"""
+    data = request.get_json()
+    to_phone = data.get('phone')
+    
+    if not to_phone:
+        return jsonify({'error': 'Número de telefone é obrigatório'}), 400
+    
+    result = send_whatsapp_message(
+        to_phone=to_phone,
+        message=f"🧪 Teste SeniorCare: Esta é uma mensagem de teste enviada às {datetime.utcnow().strftime('%H:%M')}.",
+        user_id=current_user.id
+    )
+    
+    return jsonify(result)
+
+
+@app.route('/api/notifications/whatsapp/send', methods=['POST'])
+@token_required
+def send_whatsapp_notification(current_user):
+    """Enviar notificação WhatsApp personalizada"""
+    data = request.get_json()
+    
+    notification_type = data.get('type', 'custom')
+    
+    if notification_type == 'medication_reminder':
+        # Lembrete de medicação
+        medication_name = data.get('medication_name', 'medicação')
+        scheduled_time = data.get('scheduled_time', 'agora')
+        alert_level = data.get('alert_level', 'first')
+        
+        send_medication_reminder(
+            user_id=current_user.id,
+            medication_name=medication_name,
+            scheduled_time=scheduled_time,
+            alert_level=alert_level
+        )
+        return jsonify({'success': True, 'type': 'medication_reminder'})
+    
+    elif notification_type == 'emergency':
+        # Alerta de emergência
+        results = send_emergency_alert(
+            user_id=current_user.id,
+            alert_type=data.get('alert_type', 'emergency'),
+            custom_message=data.get('message')
+        )
+        return jsonify({
+            'success': True,
+            'type': 'emergency',
+            'notifications_sent': len([r for r in results if r.get('success')])
+        })
+    
+    elif notification_type == 'custom':
+        # Mensagem personalizada
+        to_phone = data.get('phone')
+        message = data.get('message')
+        
+        if not to_phone or not message:
+            return jsonify({'error': 'phone e message são obrigatórios'}), 400
+        
+        result = send_whatsapp_message(
+            to_phone=to_phone,
+            message=message,
+            user_id=current_user.id
+        )
+        return jsonify(result)
+    
+    else:
+        return jsonify({'error': f'Tipo de notificação desconhecido: {notification_type}'}), 400
+
+
+@app.route('/api/notifications/caregivers', methods=['POST'])
+@token_required
+def notify_all_caregivers(current_user):
+    """Notificar todos os cuidadores do utilizador"""
+    data = request.get_json()
+    message = data.get('message')
+    
+    if not message:
+        return jsonify({'error': 'message é obrigatório'}), 400
+    
+    results = notify_caregivers(
+        user_id=current_user.id,
+        notification_type=data.get('type', 'custom'),
+        message=message
+    )
+    
+    return jsonify({
+        'success': True,
+        'notifications_sent': len([r for r in results if r.get('success')]),
+        'details': results
+    })
 
 
 # ==================== TIPOS DE MEDIÇÕES (para o frontend) ====================
