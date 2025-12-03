@@ -4,10 +4,10 @@ from contextlib import asynccontextmanager
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Import here to avoid import time issues
-    from app.database import engine
+    from app.database import get_engine
     from app.models import user, medication, routine  # Import models to create tables
     # Create tables on startup
-    user.Base.metadata.create_all(bind=engine)
+    user.Base.metadata.create_all(bind=get_engine())
     yield
 
 app = FastAPI(title="SeniorCare API", version="1.0.0", lifespan=lifespan)
