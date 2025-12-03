@@ -1,4 +1,4 @@
-﻿# SeniorCare - Dependências Python
+# SeniorCare - Dependências Python
 
 # Framework Web
 Flask==3.0.0
