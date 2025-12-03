@@ -4,10 +4,10 @@
 Flask==3.0.0
 gunicorn==21.2.0
 
-# Base de dados
+# Base de dados - psycopg3 (compatível com Python 3.13)
 Flask-SQLAlchemy==3.1.1
 Flask-Migrate==4.0.5
-psycopg2-binary==2.9.9
+psycopg[binary]==3.2.3
 
 # Segurança e Autenticação
 Flask-CORS==4.0.0
